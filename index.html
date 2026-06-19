@@ -3,20 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>&nbsp;</title>
 <style>
   :root {
     --bg: #0a0e14;
-    --bg2: #0f1520;
-    --border: rgba(100,160,220,0.15);
-    --text-dim: rgba(160,200,240,0.4);
-    --text-mid: rgba(160,200,240,0.7);
-    --text: rgba(200,225,255,0.9);
-    --gem-dim-1: #1a3a5c;
-    --gem-dim-2: #0d2240;
-    --gem-dim-3: #061526;
-    --gem-lit-1: #e8f8ff;
-    --gem-lit-2: #88d8ff;
-    --gem-lit-3: #1a8aff;
     --glow-color: rgba(80,180,255,0.35);
   }
 
@@ -25,44 +15,30 @@
   html, body {
     height: 100%;
     background: var(--bg);
-    color: var(--text);
-    font-family: 'Georgia', serif;
     overflow: hidden;
   }
 
   body {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100dvh;
-    padding: 2rem 1.5rem;
-    gap: 0;
-  }
-
-  .title {
-    font-size: 11px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 3.5rem;
-    font-family: 'Georgia', serif;
+    padding: 2rem;
   }
 
   .gem-wrap {
     position: relative;
-    width: 160px;
-    height: 160px;
+    width: 170px;
+    height: 170px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 3.5rem;
   }
 
   .glow-outer {
     position: absolute;
-    width: 260px;
-    height: 260px;
+    width: 280px;
+    height: 280px;
     border-radius: 50%;
     background: radial-gradient(circle, var(--glow-color) 0%, transparent 65%);
     opacity: 0;
@@ -72,8 +48,8 @@
 
   .glow-inner {
     position: absolute;
-    width: 180px;
-    height: 180px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(160,220,255,0.5) 0%, transparent 60%);
     opacity: 0;
@@ -82,68 +58,16 @@
   }
 
   #gem-svg {
-    width: 160px;
-    height: 160px;
+    width: 170px;
+    height: 170px;
     position: relative;
     z-index: 1;
     filter: drop-shadow(0 0 0px transparent);
     transition: filter 0.04s ease;
   }
-
-  .status-area {
-    height: 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .status-line {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    min-height: 16px;
-  }
-
-  .progress-track {
-    width: 120px;
-    height: 1px;
-    background: rgba(100,150,200,0.15);
-    border-radius: 1px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: rgba(100,180,255,0.5);
-    border-radius: 1px;
-    transition: width 0.1s;
-  }
-
-  .corner-tl, .corner-tr, .corner-bl, .corner-br {
-    position: fixed;
-    width: 24px;
-    height: 24px;
-    border-color: rgba(80,140,200,0.2);
-    border-style: solid;
-  }
-  .corner-tl { top: 20px; left: 20px; border-width: 1px 0 0 1px; }
-  .corner-tr { top: 20px; right: 20px; border-width: 1px 1px 0 0; }
-  .corner-bl { bottom: 20px; left: 20px; border-width: 0 0 1px 1px; }
-  .corner-br { bottom: 20px; right: 20px; border-width: 0 1px 1px 0; }
 </style>
 </head>
 <body>
-
-<div class="corner-tl"></div>
-<div class="corner-tr"></div>
-<div class="corner-bl"></div>
-<div class="corner-br"></div>
-
-<p class="title">Gema de transmisión</p>
 
 <div class="gem-wrap">
   <div class="glow-outer" id="glow-outer"></div>
@@ -178,20 +102,11 @@
   </svg>
 </div>
 
-<div class="status-area">
-  <div class="status-line" id="status-line">en reposo</div>
-  <div class="progress-track">
-    <div class="progress-fill" id="progress-fill"></div>
-  </div>
-</div>
-
 <script>
 const GEM   = document.getElementById('gem-body');
 const GOUTER= document.getElementById('glow-outer');
 const GINNER= document.getElementById('glow-inner');
 const GEMSVG= document.getElementById('gem-svg');
-const STATUS= document.getElementById('status-line');
-const PROG  = document.getElementById('progress-fill');
 
 const MORSE = {
   'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---',
@@ -238,7 +153,7 @@ function buildTokens(text, shift, unit) {
         tokens.push({ lit: true,  dur: s === '.' ? DOT : DASH });
         if (si < m.length - 1) tokens.push({ lit: false, dur: SYM_GAP });
       });
-      tokens.push({ lit: false, dur: ci < word.length - 1 ? CHAR_GAP : CHAR_GAP });
+      tokens.push({ lit: false, dur: CHAR_GAP });
     });
     if (wi < words.length - 1) tokens.push({ lit: false, dur: WORD_GAP });
   });
@@ -254,31 +169,17 @@ async function transmit(msg, shift, unit) {
   stopFlag = false;
 
   const tokens = buildTokens(msg, shift, unit);
-  const total  = tokens.reduce((s, t) => s + t.dur, 0);
-  let elapsed  = 0;
-
-  PROG.style.width   = '0%';
 
   for (const tok of tokens) {
     if (stopFlag) break;
     setLit(tok.lit);
     await sleep(tok.dur);
-    elapsed += tok.dur;
-    PROG.style.width = Math.min(100, Math.round((elapsed / total) * 100)) + '%';
   }
 
   setLit(false);
-  if (!stopFlag) {
-    STATUS.textContent = '';
-    PROG.style.width   = '100%';
-  } else {
-    STATUS.textContent = 'en reposo';
-    PROG.style.width   = '0%';
-  }
   running = false;
 }
 
-// Listen for messages from DM page via BroadcastChannel
 const bc = new BroadcastChannel('gemstone-morse');
 bc.onmessage = (e) => {
   const { msg, shift, unit } = e.data;
@@ -288,4 +189,3 @@ bc.onmessage = (e) => {
 </script>
 </body>
 </html>
-
