@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gema de Transmisión</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --bg2: #0f1520;
+    --border: rgba(100,160,220,0.15);
+    --text-dim: rgba(160,200,240,0.4);
+    --text-mid: rgba(160,200,240,0.7);
+    --text: rgba(200,225,255,0.9);
+    --gem-dim-1: #1a3a5c;
+    --gem-dim-2: #0d2240;
+    --gem-dim-3: #061526;
+    --gem-lit-1: #e8f8ff;
+    --gem-lit-2: #88d8ff;
+    --gem-lit-3: #1a8aff;
+    --glow-color: rgba(80,180,255,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 2rem 1.5rem;
+    gap: 0;
+  }
+
+  .title {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 3.5rem;
+    font-family: 'Georgia', serif;
+  }
+
+  .gem-wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3.5rem;
+  }
+
+  .glow-outer {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow-color) 0%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.04s ease;
+    pointer-events: none;
+  }
+
+  .glow-inner {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(160,220,255,0.5) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.04s ease;
+    pointer-events: none;
+  }
+
+  #gem-svg {
+    width: 160px;
+    height: 160px;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 0 0px transparent);
+    transition: filter 0.04s ease;
+  }
+
+  .status-area {
+    height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .status-line {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    min-height: 16px;
+  }
+
+  .progress-track {
+    width: 120px;
+    height: 1px;
+    background: rgba(100,150,200,0.15);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: rgba(100,180,255,0.5);
+    border-radius: 1px;
+    transition: width 0.1s;
+  }
+
+  .corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    border-color: rgba(80,140,200,0.2);
+    border-style: solid;
+  }
+  .corner-tl { top: 20px; left: 20px; border-width: 1px 0 0 1px; }
+  .corner-tr { top: 20px; right: 20px; border-width: 1px 1px 0 0; }
+  .corner-bl { bottom: 20px; left: 20px; border-width: 0 0 1px 1px; }
+  .corner-br { bottom: 20px; right: 20px; border-width: 0 1px 1px 0; }
+</style>
+</head>
+<body>
+
+<div class="corner-tl"></div>
+<div class="corner-tr"></div>
+<div class="corner-bl"></div>
+<div class="corner-br"></div>
+
+<p class="title">Gema de transmisión</p>
+
+<div class="gem-wrap">
+  <div class="glow-outer" id="glow-outer"></div>
+  <div class="glow-inner" id="glow-inner"></div>
+  <svg id="gem-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="gDim" cx="38%" cy="28%" r="72%">
+        <stop offset="0%"   stop-color="#3a6a9a"/>
+        <stop offset="45%"  stop-color="#1a3a5c"/>
+        <stop offset="100%" stop-color="#061526"/>
+      </radialGradient>
+      <radialGradient id="gLit" cx="38%" cy="28%" r="72%">
+        <stop offset="0%"   stop-color="#ffffff"/>
+        <stop offset="25%"  stop-color="#c8f0ff"/>
+        <stop offset="70%"  stop-color="#3ab8ff"/>
+        <stop offset="100%" stop-color="#1a6aff"/>
+      </radialGradient>
+    </defs>
+    <polygon id="gem-body"
+      points="50,6 84,30 84,70 50,94 16,70 16,30"
+      fill="url(#gDim)" stroke="rgba(80,140,200,0.4)" stroke-width="0.8"/>
+    <polygon points="50,6 84,30 50,50"  fill="rgba(255,255,255,0.12)"/>
+    <polygon points="50,6 16,30 50,50"  fill="rgba(255,255,255,0.06)"/>
+    <polygon points="84,30 84,70 50,50" fill="rgba(0,20,50,0.25)"/>
+    <polygon points="16,30 16,70 50,50" fill="rgba(0,20,50,0.35)"/>
+    <polygon points="50,94 84,70 50,50" fill="rgba(0,10,30,0.3)"/>
+    <polygon points="50,94 16,70 50,50" fill="rgba(0,10,30,0.2)"/>
+    <ellipse cx="37" cy="26" rx="5" ry="3.5"
+      fill="rgba(255,255,255,0.18)" transform="rotate(-20,37,26)"/>
+    <ellipse cx="43" cy="22" rx="2" ry="1.5"
+      fill="rgba(255,255,255,0.28)" transform="rotate(-20,43,22)"/>
+  </svg>
+</div>
+
+<div class="status-area">
+  <div class="status-line" id="status-line">en reposo</div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<script>
+const GEM   = document.getElementById('gem-body');
+const GOUTER= document.getElementById('glow-outer');
+const GINNER= document.getElementById('glow-inner');
+const GEMSVG= document.getElementById('gem-svg');
+const STATUS= document.getElementById('status-line');
+const PROG  = document.getElementById('progress-fill');
+
+const MORSE = {
+  'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---',
+  'K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-',
+  'U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'
+};
+const ALPHA  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const DIGITS = '0123456789';
+
+function shiftChar(c, n) {
+  if (ALPHA.includes(c))  return ALPHA[ (ALPHA.indexOf(c)  + n) % 26];
+  if (DIGITS.includes(c)) return DIGITS[(DIGITS.indexOf(c) + n) % 10];
+  return c;
+}
+
+function setLit(on) {
+  if (on) {
+    GEM.setAttribute('fill', 'url(#gLit)');
+    GEM.setAttribute('stroke', 'rgba(160,230,255,0.8)');
+    GOUTER.style.opacity = '1';
+    GINNER.style.opacity = '1';
+    GEMSVG.style.filter  = 'drop-shadow(0 0 18px rgba(80,180,255,0.6))';
+  } else {
+    GEM.setAttribute('fill', 'url(#gDim)');
+    GEM.setAttribute('stroke', 'rgba(80,140,200,0.4)');
+    GOUTER.style.opacity = '0';
+    GINNER.style.opacity = '0';
+    GEMSVG.style.filter  = 'drop-shadow(0 0 0px transparent)';
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function buildTokens(text, shift, unit) {
+  const DOT = unit, DASH = unit * 3;
+  const SYM_GAP = unit, CHAR_GAP = unit * 3, WORD_GAP = unit * 7;
+  const tokens = [];
+  text.toUpperCase().split(' ').forEach((word, wi, words) => {
+    word.split('').forEach((c, ci) => {
+      const sc = shiftChar(c, shift);
+      const m  = MORSE[sc]; if (!m) return;
+      m.split('').forEach((s, si) => {
+        tokens.push({ lit: true,  dur: s === '.' ? DOT : DASH });
+        if (si < m.length - 1) tokens.push({ lit: false, dur: SYM_GAP });
+      });
+      tokens.push({ lit: false, dur: ci < word.length - 1 ? CHAR_GAP : CHAR_GAP });
+    });
+    if (wi < words.length - 1) tokens.push({ lit: false, dur: WORD_GAP });
+  });
+  return tokens;
+}
+
+let running = false;
+let stopFlag = false;
+
+async function transmit(msg, shift, unit) {
+  if (running) { stopFlag = true; return; }
+  running  = true;
+  stopFlag = false;
+
+  const tokens = buildTokens(msg, shift, unit);
+  const total  = tokens.reduce((s, t) => s + t.dur, 0);
+  let elapsed  = 0;
+
+  STATUS.textContent = 'recibiendo';
+  PROG.style.width   = '0%';
+
+  for (const tok of tokens) {
+    if (stopFlag) break;
+    setLit(tok.lit);
+    await sleep(tok.dur);
+    elapsed += tok.dur;
+    PROG.style.width = Math.min(100, Math.round((elapsed / total) * 100)) + '%';
+  }
+
+  setLit(false);
+  if (!stopFlag) {
+    STATUS.textContent = 'transmisión completa';
+    PROG.style.width   = '100%';
+  } else {
+    STATUS.textContent = 'en reposo';
+    PROG.style.width   = '0%';
+  }
+  running = false;
+}
+
+// Listen for messages from DM page via BroadcastChannel
+const bc = new BroadcastChannel('gemstone-morse');
+bc.onmessage = (e) => {
+  const { msg, shift, unit } = e.data;
+  if (!msg) return;
+  transmit(msg, shift, unit);
+};
+</script>
+</body>
+</html>

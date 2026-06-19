@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DM — Gema de Transmisión</title>
+<style>
+  :root {
+    --bg: #0c0f14;
+    --bg2: #131820;
+    --bg3: #1a2030;
+    --border: rgba(100,150,200,0.18);
+    --border-active: rgba(100,160,220,0.4);
+    --text-dim: rgba(160,200,240,0.45);
+    --text-mid: rgba(180,210,245,0.7);
+    --text: rgba(210,230,255,0.92);
+    --accent: rgba(80,160,240,0.85);
+    --accent-bg: rgba(40,90,160,0.25);
+    --danger: rgba(240,100,90,0.85);
+    --danger-bg: rgba(140,40,30,0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 1.25rem 2rem;
+    gap: 1.25rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  header h1 {
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: normal;
+  }
+
+  .badge {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 3px 8px;
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+    font-family: 'Georgia', serif;
+  }
+
+  .section { display: flex; flex-direction: column; gap: 8px; }
+
+  label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: 'Georgia', serif;
+    resize: none;
+    line-height: 1.6;
+    letter-spacing: 0.05em;
+    -webkit-appearance: none;
+  }
+  textarea::placeholder { color: var(--text-dim); }
+  textarea:focus { outline: none; border-color: var(--border-active); }
+
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .control-group { display: flex; flex-direction: column; gap: 8px; }
+
+  select {
+    padding: 10px 12px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Georgia', serif;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(160,200,240,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  select:focus { outline: none; border-color: var(--border-active); }
+
+  .morse-box {
+    padding: 12px 14px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 2;
+    word-break: break-all;
+    min-height: 52px;
+    letter-spacing: 0.05em;
+  }
+
+  .note {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+  .note span {
+    color: var(--text-mid);
+  }
+
+  .btn-transmit {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent-bg);
+    border: 0.5px solid var(--accent);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 13px;
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-transmit:hover { background: rgba(40,90,160,0.4); }
+  .btn-transmit:active { transform: scale(0.98); }
+  .btn-transmit.transmitting {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 1px;
+    background: rgba(100,150,200,0.12);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    opacity: 0.6;
+    border-radius: 1px;
+    transition: width 0.1s;
+  }
+
+  .status-text {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: center;
+    min-height: 16px;
+  }
+
+  hr {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gema de transmisión</h1>
+  <span class="badge">DM</span>
+</header>
+
+<div class="section">
+  <label>Mensaje</label>
+  <textarea id="msg" rows="3" placeholder="Escribe el mensaje...">PELIGRO EN EL NIVEL TRES</textarea>
+</div>
+
+<div class="controls-row">
+  <div class="control-group">
+    <label>Desface</label>
+    <select id="shift">
+      <option value="1">+1</option>
+      <option value="2">+2</option>
+      <option value="3">+3</option>
+      <option value="4">+4</option>
+      <option value="5" selected>+5</option>
+      <option value="6">+6</option>
+      <option value="7">+7</option>
+      <option value="8">+8</option>
+      <option value="9">+9</option>
+      <option value="10">+10</option>
+      <option value="13">+13 (ROT13)</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label>Velocidad</label>
+    <select id="speed">
+      <option value="140">Muy lenta</option>
+      <option value="100">Lenta</option>
+      <option value="70" selected>Normal</option>
+      <option value="45">Rápida</option>
+    </select>
+  </div>
+</div>
+
+<div class="section">
+  <label>Morse codificado (lo que se transmite)</label>
+  <div class="morse-box" id="morse-preview">—</div>
+  <p class="note" id="shift-note">Cada letra se desplaza <span>+5</span> antes de convertirse a morse</p>
+</div>
+
+<hr>
+
+<div class="section">
+  <button class="btn-transmit" id="btn-transmit" onclick="handleTransmit()">
+    Transmitir
+  </button>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="status-text" id="status-text"></div>
+</div>
+
+<script>
+const MORSE = {
+  'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.','F':'..-.','G':'--.','H':'....','I':'..','J':'.---',
+  'K':'-.-','L':'.-..','M':'--','N':'-.','O':'---','P':'.--.','Q':'--.-','R':'.-.','S':'...','T':'-',
+  'U':'..-','V':'...-','W':'.--','X':'-..-','Y':'-.--','Z':'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'
+};
+const ALPHA  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const DIGITS = '0123456789';
+
+function shiftChar(c, n) {
+  if (ALPHA.includes(c))  return ALPHA[ (ALPHA.indexOf(c)  + n) % 26];
+  if (DIGITS.includes(c)) return DIGITS[(DIGITS.indexOf(c) + n) % 10];
+  return c;
+}
+
+function toMorse(text, shift) {
+  return text.toUpperCase().split('').map(c => {
+    if (c === ' ') return '/';
+    const m = MORSE[shiftChar(c, shift)];
+    return m || '?';
+  }).join(' ');
+}
+
+function getShift() { return parseInt(document.getElementById('shift').value); }
+function getSpeed() { return parseInt(document.getElementById('speed').value); }
+
+function updatePreview() {
+  const msg   = document.getElementById('msg').value || '';
+  const shift = getShift();
+  document.getElementById('morse-preview').textContent = toMorse(msg, shift) || '—';
+  document.getElementById('shift-note').innerHTML =
+    `Cada letra se desplaza <span>+${shift}</span> antes de convertirse a morse`;
+}
+
+document.getElementById('msg').addEventListener('input', updatePreview);
+document.getElementById('shift').addEventListener('change', updatePreview);
+updatePreview();
+
+// BroadcastChannel to talk to player page (same origin)
+const bc = new BroadcastChannel('gemstone-morse');
+
+function buildTokens(text, shift, unit) {
+  const DOT = unit, DASH = unit * 3;
+  const SYM_GAP = unit, CHAR_GAP = unit * 3, WORD_GAP = unit * 7;
+  const tokens = [];
+  text.toUpperCase().split(' ').forEach((word, wi, words) => {
+    word.split('').forEach((c, ci) => {
+      const sc = shiftChar(c, shift);
+      const m  = MORSE[sc]; if (!m) return;
+      m.split('').forEach((s, si) => {
+        tokens.push({ lit: true,  dur: s === '.' ? DOT : DASH });
+        if (si < m.length - 1) tokens.push({ lit: false, dur: SYM_GAP });
+      });
+      tokens.push({ lit: false, dur: CHAR_GAP });
+    });
+    if (wi < words.length - 1) tokens.push({ lit: false, dur: WORD_GAP });
+  });
+  return tokens;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+let running  = false;
+let stopFlag = false;
+
+async function handleTransmit() {
+  if (running) {
+    stopFlag = true;
+    return;
+  }
+
+  const msg   = document.getElementById('msg').value.trim();
+  if (!msg) return;
+  const shift = getShift();
+  const unit  = getSpeed();
+
+  // Also drive the local progress bar / button state
+  const btn   = document.getElementById('btn-transmit');
+  const prog  = document.getElementById('progress-fill');
+  const stat  = document.getElementById('status-text');
+
+  running  = true;
+  stopFlag = false;
+  btn.textContent = 'Detener';
+  btn.classList.add('transmitting');
+  stat.textContent = 'transmitiendo...';
+  prog.style.width = '0%';
+
+  // Send start signal to player page
+  bc.postMessage({ msg, shift, unit });
+
+  // Mirror progress locally
+  const tokens = buildTokens(msg, shift, unit);
+  const total  = tokens.reduce((s, t) => s + t.dur, 0);
+  let elapsed  = 0;
+
+  for (const tok of tokens) {
+    if (stopFlag) break;
+    await sleep(tok.dur);
+    elapsed += tok.dur;
+    prog.style.width = Math.min(100, Math.round((elapsed / total) * 100)) + '%';
+  }
+
+  btn.textContent = 'Transmitir';
+  btn.classList.remove('transmitting');
+  stat.textContent = stopFlag ? 'interrumpido' : 'transmisión completa';
+  if (!stopFlag) prog.style.width = '100%';
+  running = false;
+}
+</script>
+</body>
+</html>
