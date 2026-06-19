@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Gema de Transmisión</title>
 <style>
   :root {
     --bg: #0a0e14;
@@ -258,7 +257,6 @@ async function transmit(msg, shift, unit) {
   const total  = tokens.reduce((s, t) => s + t.dur, 0);
   let elapsed  = 0;
 
-  STATUS.textContent = 'recibiendo';
   PROG.style.width   = '0%';
 
   for (const tok of tokens) {
@@ -271,7 +269,7 @@ async function transmit(msg, shift, unit) {
 
   setLit(false);
   if (!stopFlag) {
-    STATUS.textContent = 'transmisión completa';
+    STATUS.textContent = '';
     PROG.style.width   = '100%';
   } else {
     STATUS.textContent = 'en reposo';
